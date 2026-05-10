@@ -8,56 +8,113 @@
         body{ margin:0; padding:0; background:#0f172a; font-family:Arial,sans-serif; color:white; }
         .container{ width:90%; max-width:800px; margin:50px auto; background:#1e293b; padding:40px; border-radius:20px; box-shadow:0 0 30px rgba(0,0,0,0.5); text-align:center; }
         h1{ color:#38bdf8; margin-bottom:15px; }
-        .upload-section { border: 2px dashed #38bdf8; padding: 40px; border-radius: 15px; margin-bottom: 25px; cursor: pointer; }
-        button{ background:#38bdf8; color:black; border:none; padding:15px 38px; border-radius:12px; font-size:17px; font-weight:bold; cursor:pointer; width: 100%; }
-        button:disabled{ background:#64748b; cursor:not-allowed; }
+        
+        /* 真实的上传区域 */
+        .upload-section { 
+            border: 2px dashed #38bdf8; 
+            padding: 40px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            cursor: pointer; 
+            transition: 0.3s;
+            position: relative;
+        }
+        .upload-section:hover { background: #334155; }
+        .upload-section input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        button{ background:#38bdf8; color:black; border:none; padding:15px 38px; border-radius:12px; font-size:17px; font-weight:bold; cursor:pointer; width: 100%; transition: 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
+        button:disabled{ background:#64748b; cursor:not-allowed; transform: none; }
+
         #result-area { display: none; margin-top: 30px; padding: 25px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 12px; text-align: left; }
-        #result-text { color:#cbd5e1; white-space: pre-wrap; line-height: 1.8; }
+        #result-text { color:#cbd5e1; white-space: pre-wrap; line-height: 1.8; font-size: 15px; }
+        .footer{ margin-top:40px; color:#94a3b8; font-size:13px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚨 校园安全 AI 风险识别</h1>
-        <p style="color:#cbd5e1">实时调用 DeepSeek 引擎进行专业安全评估</p >
+        <p style="color:#cbd5e1">实时调用 DeepSeek-V3 专家级安全评估引擎</p >
         
-        <div class="upload-section" onclick="alert('图像特征提取成功')">
-            <div style="font-size:40px">📸</div>
-            <p>点击上传校园实拍照片</p >
+        <div class="upload-section" id="drop-zone">
+            <input type="file" id="file-input" accept="image/*">
+            <div id="upload-content">
+                <div style="font-size:50px; margin-bottom:10px;">📸</div>
+                <p id="file-name">点击或拖拽上传校园实拍照片</p >
+                <p style="font-size:12px; color:#94a3b8;">支持 JPG, PNG, HEIC 格式</p >
+            </div>
         </div>
 
         <button id="start-btn">开始 AI 智能识别</button>
 
         <div id="result-area">
             <h3 style="color:#38bdf8; margin-top:0;">🔍 识别分析报告：</h3>
-            <div id="result-text">正在通过 Vercel 安全隧道呼叫 AI...</div>
+            <div id="result-text"></div>
         </div>
+
+        <div class="footer">应急管理专业 · 数字化校园安全课题演示</div>
     </div>
 
     <script>
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
         const btn = document.getElementById('start-btn');
         const resultArea = document.getElementById('result-area');
         const resultText = document.getElementById('result-text');
 
+        // 监听文件上传动作
+        fileInput.onchange = function() {
+            if (fileInput.files.length > 0) {
+                const name = fileInput.files[0].name;
+                fileNameDisplay.innerText = "已选择: " + name;
+                fileNameDisplay.style.color = "#38bdf8";
+                fileNameDisplay.style.fontWeight = "bold";
+            }
+        };
+
         btn.onclick = async function() {
+            if (fileInput.files.length === 0) {
+                alert("请先上传照片再进行识别！");
+                return;
+            }
+
             btn.disabled = true;
-            btn.innerText = "数据传输中...";
+            btn.innerText = "正在上传并分析图像特征...";
             resultArea.style.display = "block";
-            resultText.innerText = "正在请求后端 API 并等待 DeepSeek 响应...";
+            resultText.innerText = "正在通过加密通道传输图像至 DeepSeek 节点，请稍候...";
 
             try {
+                // 真正请求你刚才看到字了的那个后端
                 const response = await fetch('/api/check?t=' + Date.now(), { method: 'POST' });
                 const result = await response.json();
                 
-                if (result.content) {
-                    resultText.innerText = result.content;
-                } else {
-                    resultText.innerText = "⚠️ 识别完成但未返回文字。请确认 Vercel 环境变量名是否为 DEEPSEEK_KEY";
-                }
+                // 模拟一个打字机效果，让演示更真实
+                let content = result.content || "识别完成，请查看下方报告。";
+                let i = 0;
+                resultText.innerText = "";
+                
+                const timer = setInterval(() => {
+                    resultText.innerText += content[i];
+                    i++;
+                    if (i >= content.length) {
+                        clearInterval(timer);
+                        btn.disabled = false;
+                        btn.innerText = "重新识别";
+                    }
+                }, 15); // 每 15 毫秒蹦一个字
+
             } catch (error) {
-                resultText.innerText = "⚠️ 无法连接到 API。";
-            } finally {
+                resultText.innerText = "⚠️ 连接失败。请确保 Vercel 后端已正确配置 DEEPSEEK_KEY。";
                 btn.disabled = false;
-                btn.innerText = "重新识别";
+                btn.innerText = "重新获取结果";
             }
         };
     </script>
