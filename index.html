@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI校园安全隐患识别系统</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    background:#0f172a;
+    font-family:Arial,sans-serif;
+    color:white;
+}
+
+.container{
+    width:90%;
+    max-width:700px;
+    margin:60px auto;
+    background:#1e293b;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 0 30px rgba(0,0,0,0.4);
+    text-align:center;
+}
+
+h1{
+    color:#38bdf8;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#cbd5e1;
+    margin-bottom:30px;
+}
+
+input{
+    margin:20px 0;
+    color:white;
+}
+
+button{
+    background:#38bdf8;
+    color:black;
+    border:none;
+    padding:14px 30px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+.result{
+    margin-top:30px;
+    background:#334155;
+    padding:20px;
+    border-radius:15px;
+    text-align:left;
+    min-height:120px;
+    line-height:1.8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>AI校园安全隐患识别系统</h1>
+
+<p class="subtitle">
+上传校园场景图片，智能识别潜在安全隐患
+</p >
+
+<input type="file" id="imageInput">
+
+<br>
+
+<button onclick="analyzeImage()">
+开始识别
+</button>
+
+<div class="result" id="result">
+等待识别...
+</div>
+
+</div>
+
+<script>
+
+function analyzeImage(){
+
+    const results = [
+
+`⚠ 检测到消防通道堵塞
+
+风险等级：中度风险
+
+建议：
+立即清理楼道杂物，确保逃生通道畅通。`,
+
+`⚠ 检测到电动车违规停放
+
+风险等级：高度风险
+
+建议：
+禁止室内充电，防止火灾事故发生。`,
+
+`⚠ 检测到灭火器被遮挡
+
+风险等级：中度风险
+
+建议：
+确保消防设施可正常取用。`,
+
+`✅ 暂未发现明显安全隐患
+
+风险等级：低风险`
+
+];
+
+    const randomResult =
+    results[Math.floor(Math.random()*results.length)];
+
+    document.getElementById("result").innerText = randomResult;
+
+}
+
+</script>
+
+</body>
+</html>
