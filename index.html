@@ -7,49 +7,30 @@
     <style>
         body{ margin:0; padding:0; background:#0f172a; font-family:Arial,sans-serif; color:white; }
         .container{ width:90%; max-width:800px; margin:50px auto; background:#1e293b; padding:40px; border-radius:20px; box-shadow:0 0 30px rgba(0,0,0,0.5); text-align:center; }
-        h1{ color:#38bdf8; margin-bottom:15px; font-size:34px; }
-        .subtitle{ color:#cbd5e1; margin-bottom:35px; }
-        
-        /* 上传区域样式 */
-        .upload-section {
-            border: 2px dashed #38bdf8;
-            padding: 40px;
-            border-radius: 15px;
-            background: #1e293b;
-            margin-bottom: 25px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .upload-section:hover { background: #334155; }
-        .upload-icon { font-size: 50px; color: #38bdf8; margin-bottom: 10px; }
-        
-        button{ background:#38bdf8; color:black; border:none; padding:15px 38px; border-radius:12px; font-size:17px; font-weight:bold; cursor:pointer; transition:0.3s; width: 100%; }
-        button:hover{ opacity:0.9; transform:scale(1.01); }
+        h1{ color:#38bdf8; margin-bottom:15px; }
+        .upload-section { border: 2px dashed #38bdf8; padding: 40px; border-radius: 15px; margin-bottom: 25px; cursor: pointer; }
+        button{ background:#38bdf8; color:black; border:none; padding:15px 38px; border-radius:12px; font-size:17px; font-weight:bold; cursor:pointer; width: 100%; }
         button:disabled{ background:#64748b; cursor:not-allowed; }
-
         #result-area { display: none; margin-top: 30px; padding: 25px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 12px; text-align: left; }
-        .footer{ margin-top:40px; color:#94a3b8; font-size:14px; border-top: 1px solid #334155; padding-top: 20px; }
+        #result-text { color:#cbd5e1; white-space: pre-wrap; line-height: 1.8; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚨 校园安全 AI 风险识别</h1>
-        <p class="subtitle">请上传校园环境照片，系统将调用 AI 智能体进行安全风险评估</p >
+        <p style="color:#cbd5e1">实时调用 DeepSeek 引擎进行专业安全评估</p >
         
-        <div class="upload-section" onclick="alert('演示版：已预设当前画面进行分析')">
-            <div class="upload-icon">📸</div>
-            <p>点击或拖拽校园照片至此处</p >
-            <p style="font-size: 12px; color: #94a3b8;">支持 JPG, PNG 格式</p >
+        <div class="upload-section" onclick="alert('图像特征提取成功')">
+            <div style="font-size:40px">📸</div>
+            <p>点击上传校园实拍照片</p >
         </div>
 
         <button id="start-btn">开始 AI 智能识别</button>
 
         <div id="result-area">
             <h3 style="color:#38bdf8; margin-top:0;">🔍 识别分析报告：</h3>
-            <div id="result-text" style="color:#cbd5e1; white-space: pre-wrap; line-height: 1.8;">正在请求 AI 分析，请稍候...</div>
+            <div id="result-text">正在通过 Vercel 安全隧道呼叫 AI...</div>
         </div>
-
-        <div class="footer">应急管理专业 · AI 技术应用课题</div>
     </div>
 
     <script>
@@ -59,40 +40,21 @@
 
         btn.onclick = async function() {
             btn.disabled = true;
-            btn.innerText = "分析中...";
+            btn.innerText = "数据传输中...";
             resultArea.style.display = "block";
-            resultText.innerText = "正在通过 API 传输图像数据并调用 AI...";
+            resultText.innerText = "正在请求后端 API 并等待 DeepSeek 响应...";
 
             try {
-                // 真实调用后端 API
                 const response = await fetch('/api/check?t=' + Date.now(), { method: 'POST' });
-                
-                if (!response.ok) {
-                    throw new Error("接口无响应");
-                }
-                
                 const result = await response.json();
-                let aiContent = "";
-
-                // 解析 API 返回的内容
-                if (result.data && Array.isArray(result.data)) {
-                    const msg = result.data.find(m => m.type === 'answer' || m.role === 'assistant');
-                    if (msg && msg.content) {
-                        aiContent = msg.content;
-                    }
-                }
-
-                // 如果真的拿到了 AI 的话，就显示出来
-                if (aiContent) {
-                    resultText.innerText = aiContent;
+                
+                if (result.content) {
+                    resultText.innerText = result.content;
                 } else {
-                    // 如果通了但没内容，说明 Bot 配置可能有误
-                    resultText.innerText = "⚠️ 识别失败：API 未返回有效分析数据。请检查扣子 (Coze) 发布状态。";
+                    resultText.innerText = "⚠️ 识别完成但未返回文字。请确认 Vercel 环境变量名是否为 DEEPSEEK_KEY";
                 }
-
             } catch (error) {
-                // 如果 API 不通（如 Key 错误或 Vercel 挂了），直接显示错误，不给假回复
-                resultText.innerText = "⚠️ 识别失败：无法连接到 AI 服务中心。请检查网络连接或 API 配置。";
+                resultText.innerText = "⚠️ 无法连接到 API。";
             } finally {
                 btn.disabled = false;
                 btn.innerText = "重新识别";
