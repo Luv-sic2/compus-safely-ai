@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI校园安全隐患识别系统</title>
+
+<title>AI校园安全风险识别系统</title>
 
 <style>
 
@@ -17,53 +18,64 @@ body{
 
 .container{
     width:90%;
-    max-width:700px;
-    margin:60px auto;
+    max-width:800px;
+    margin:50px auto;
     background:#1e293b;
     padding:40px;
     border-radius:20px;
-    box-shadow:0 0 30px rgba(0,0,0,0.4);
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
     text-align:center;
 }
 
 h1{
     color:#38bdf8;
-    margin-bottom:10px;
+    margin-bottom:15px;
+    font-size:34px;
 }
 
 .subtitle{
     color:#cbd5e1;
-    margin-bottom:30px;
+    margin-bottom:35px;
+    line-height:1.8;
 }
 
-input{
-    margin:20px 0;
-    color:white;
+.ai-box{
+    background:#334155;
+    padding:25px;
+    border-radius:16px;
+    margin-top:25px;
+    text-align:left;
+    line-height:1.9;
 }
 
 button{
     background:#38bdf8;
     color:black;
     border:none;
-    padding:14px 30px;
+    padding:15px 38px;
     border-radius:12px;
-    font-size:16px;
+    font-size:17px;
     font-weight:bold;
     cursor:pointer;
+    transition:0.3s;
+    margin-top:20px;
 }
 
 button:hover{
     opacity:0.9;
+    transform:scale(1.03);
 }
 
-.result{
-    margin-top:30px;
-    background:#334155;
-    padding:20px;
-    border-radius:15px;
+.footer{
+    margin-top:35px;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.risk-list{
     text-align:left;
-    min-height:120px;
-    line-height:1.8;
+    margin-top:20px;
+    line-height:2;
 }
 
 </style>
@@ -73,67 +85,70 @@ button:hover{
 
 <div class="container">
 
-<h1>AI校园安全隐患识别系统</h1>
+<h1>🚨 AI校园安全风险识别系统</h1>
 
 <p class="subtitle">
-上传校园场景图片，智能识别潜在安全隐患
+
+本系统基于人工智能视觉识别技术，
+可对校园常见安全隐患进行智能分析，
+辅助校园安全管理与应急风险排查。
+
 </p >
 
-<input type="file" id="imageInput">
+<button onclick="window.open('https://www.coze.cn/store/agent/7638218421255356452?bot_id=true')">
 
-<br>
+开始AI风险识别
 
-<button onclick="analyzeImage()">
-开始识别
 </button>
 
-<div class="result" id="result">
-等待识别...
-</div>
+<div class="ai-box">
+
+<h2>📌 可识别风险场景</h2>
+
+<div class="risk-list">
+
+✅ 消防通道堵塞<br>
+
+✅ 电动车违规停放/充电<br>
+
+✅ 灭火器被遮挡<br>
+
+✅ 宿舍违规用电<br>
+
+✅ 楼道杂物堆积<br>
+
+✅ 地面湿滑风险<br>
+
+✅ 高空坠物风险<br>
+
+✅ 实验室危险品乱放<br>
+
+✅ 未佩戴安全装备<br>
+
+✅ 暴雨积水风险<br>
 
 </div>
 
-<script>
+</div>
 
-function analyzeImage(){
+<div class="ai-box">
 
-    const results = [
+<h2>📖 系统说明</h2>
 
-`⚠ 检测到消防通道堵塞
+本系统结合人工智能图像识别与校园应急管理场景，
+通过AI对上传图片进行分析，
+自动识别潜在安全隐患，
+并生成风险等级与整改建议。
 
-风险等级：中度风险
+</div>
 
-建议：
-立即清理楼道杂物，确保逃生通道畅通。`,
+<div class="footer">
 
-`⚠ 检测到电动车违规停放
+智慧校园 · 应急管理专业课程设计
 
-风险等级：高度风险
+</div>
 
-建议：
-禁止室内充电，防止火灾事故发生。`,
-
-`⚠ 检测到灭火器被遮挡
-
-风险等级：中度风险
-
-建议：
-确保消防设施可正常取用。`,
-
-`✅ 暂未发现明显安全隐患
-
-风险等级：低风险`
-
-];
-
-    const randomResult =
-    results[Math.floor(Math.random()*results.length)];
-
-    document.getElementById("result").innerText = randomResult;
-
-}
-
-</script>
+</div>
 
 </body>
 </html>
