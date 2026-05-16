@@ -1,8 +1,22 @@
 export default async function handler(req, res) {
-  const auth = process.env.DEEPSEEK_KEY; 
+  // 💡 核心修复：允许所有前端网页访问这个接口，打破浏览器的拦截
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
+  // 如果是浏览器的探测请求，直接通过
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  const auth = process.env.DEEPSEEK_KEY; 
   if (!auth) {
-    return res.status(500).json({ content: "⚠️ 报错：Vercel 后台没找到 DEEPSEEK_KEY。请检查 Settings -> Environment Variables。" });
+    return res.status(500).json({ content: "⚠️ 报错：未检测到 DEEPSEEK_KEY" });
   }
 
   try {
