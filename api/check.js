@@ -1,49 +1,61 @@
 export default async function handler(req, res) {
-  // 💡 核心修复：允许所有前端网页访问这个接口，打破浏览器的拦截
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+    // 1. 允许所有人前端网页访问这个接口（解决跨域问题）
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-  // 如果是浏览器的探测请求，直接通过
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const auth = process.env.DEEPSEEK_KEY; 
-  if (!auth) {
-    return res.status(500).json({ content: "⚠️ 报错：未检测到 DEEPSEEK_KEY" });
-  }
-
-  try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${auth.trim()}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "model": "deepseek-chat",
-        "messages": [
-          {"role": "system", "content": "你是一个校园安全专家。请从消防、电力、交通三个维度给出专业的安全评估报告。"},
-          {"role": "user", "content": "执行校园安全风险实时识别分析。"}
-        ]
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.choices && data.choices[0]) {
-      res.status(200).json({ content: data.choices[0].message.content });
-    } else {
-      res.status(500).json({ content: "API 响应异常，请检查余额。" });
+    // 如果是浏览器的探测请求，直接通过
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
-  } catch (error) {
-    res.status(500).json({ content: "连接失败：" + error.message });
-  }
+    // 2. 检查有没有把钥匙（API Key）交 给 Vercel
+    const auth = process.env.DEEPSEEK_KEY;
+    if (!auth) {
+        return res.status(500).json({ content: "⚠️ 后台报错：你忘记在 Vercel 网页后台配置 DEEPSEEK_KEY 变量了！" });
+    }
+
+    try {
+        // 3. 聪明的获取前端传过来的字。如果前端没传，就用默认的作业主题
+        let userContent = "执行校园安全风险实时识别分析。";
+        
+        // 尝试自动解析前端发过来的各种格式的文本
+        if (req.body) {
+            if (typeof req.body === 'string') {
+                try { const parsed = JSON.parse(req.body); if(parsed.message) userContent = parsed.message; } catch(e){}
+            } else if (req.body.message) {
+                userContent = req.body.message;
+            }
+        }
+
+        // 4. 替前端去请求 DeepSeek 官方服务器
+        const response = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${auth.trim()}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "deepseek-chat",
+                messages: [
+                    { "role": "system", "content": "你是一个校园安全专家。请从消防、电力、交通三个维度给出专业的安全评估报告。" },
+                    { "role": "user", "content": userContent }
+                ],
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+
+        // 5. 把把大模型的回答传回给你的前端网页
+        if (data.choices && data.choices[0]) {
+            return res.status(200).json({ content: data.choices[0].message.content });
+        } else {
+            return res.status(500).json({ content: "⚠️ AI 没理我们，官方返回错误: " + JSON.stringify(data) });
+        }
+
+    } catch (error) {
+        return res.status(500).json({ content: "❌ 服务器连接失败: " + error.message });
+    }
 }
