@@ -26,7 +26,7 @@
 <body>
     <div class="container">
         <h1>🚨 校园安全 AI 风险识别</h1>
-        <p style="color:#cbd5e1">数字化校园安全课题演示 · 实时对接 AI 风险识别 model</p>
+        <p style="color:#cbd5e1">数字化校园安全课题演示 · 实时对接 AI 风险识别模型</p>
         
         <div class="upload-section">
             <input type="file" id="file-input" accept="image/*">
@@ -53,7 +53,6 @@
         const resultArea = document.getElementById('result-area');
         const resultText = document.getElementById('result-text');
 
-        // 检测文件上传状态
         fileInput.onchange = function() {
             if (fileInput.files.length > 0) {
                 fileNameDisplay.innerText = "✅ 照片已成功载入: " + fileInput.files[0].name;
@@ -62,7 +61,6 @@
             }
         };
 
-        // 炫酷的打字机动画
         function showTextWithAnimation(text) {
             let i = 0;
             resultText.innerText = "";
@@ -77,7 +75,6 @@
             }, 12);
         }
 
-        // 点击按钮向 Vercel 后台发送请求
         btn.onclick = async function() {
             if (fileInput.files.length === 0) {
                 alert("请先上传一张校园照片！");
@@ -90,37 +87,23 @@
             resultText.innerText = "正在向云计算节点发送数据包，并呼叫大模型大脑...";
 
             try {
-                // 💡 修复：使用更安全的相对路径与 POST 暗号投递
+                // 用当前网站自身的路径去请求后台，彻底避免 405 和跨域报错
                 const response = await fetch('/api/check', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: "执行校园安全风险实时识别分析。" 
-                    })
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
-                // 如果后台没开门，直接抓出错误原因
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.content || `服务器报错 (状态码: ${response.status})`);
-                }
-
                 const result = await response.json();
-                if (result.content) {
+                
+                if (response.ok && result.content) {
                     showTextWithAnimation(result.content);
                 } else {
-                    resultText.innerText = "⚠️ 接口已连通，但未收到有效报告，请检查 DeepSeek 余额。";
+                    resultText.innerText = "❌ 错误提示：" + (result.content || "未知错误");
                     btn.disabled = false;
                     btn.innerText = "重试";
                 }
             } catch (err) {
-                // 白话版错误提示，哪里不通看这里一目了然
-                resultText.innerText = "❌ 连接失败。原因：" + err.message + 
-                                       "\n\n请按照以下两点排查：\n" +
-                                       "1. 必须在 Vercel 网页后台的 Settings -> Environment Variables 里添加名为 DEEPSEEK_KEY 的钥匙。\n" +
-                                       "2. 修改代码后，必须等 Vercel 后台重新部署（Redeploy）成 Ready 状态，再刷新线上网址测试。";
+                resultText.innerText = "❌ 无法连接到后台服务，请检查 Vercel 部署状态。";
                 btn.disabled = false;
                 btn.innerText = "重试一次";
             }
