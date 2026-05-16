@@ -10,17 +10,16 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // 2. 检查有没有把钥匙（API Key）交 给 Vercel
+    // 2. 检查有没有在 Vercel 网页后台配置钥匙（API Key）
     const auth = process.env.DEEPSEEK_KEY;
     if (!auth) {
         return res.status(500).json({ content: "⚠️ 后台报错：你忘记在 Vercel 网页后台配置 DEEPSEEK_KEY 变量了！" });
     }
 
     try {
-        // 3. 聪明的获取前端传过来的字。如果前端没传，就用默认的作业主题
         let userContent = "执行校园安全风险实时识别分析。";
         
-        // 尝试自动解析前端发过来的各种格式的文本
+        // 自动解析前端发过来的各种格式的文本
         if (req.body) {
             if (typeof req.body === 'string') {
                 try { const parsed = JSON.parse(req.body); if(parsed.message) userContent = parsed.message; } catch(e){}
@@ -29,7 +28,7 @@ export default async function handler(req, res) {
             }
         }
 
-        // 4. 替前端去请求 DeepSeek 官方服务器
+        // 3. 替前端去请求 DeepSeek 官方服务器
         const response = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
             headers: {
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // 5. 把把大模型的回答传回给你的前端网页
+        // 4. 把大模型的回答传回给你的前端网页
         if (data.choices && data.choices[0]) {
             return res.status(200).json({ content: data.choices[0].message.content });
         } else {
